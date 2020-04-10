@@ -3,6 +3,9 @@ package client;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.UUID;
+//import command line parser (need to import jar files if you see errors here, see readme)
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 
 import server.Identity;
 
@@ -16,6 +19,7 @@ public class IdClient
 
 
     public static void main(String[] args) {
+    CommandLineParser parser = new DefaultParser();
 	if (args.length < 3) {
 	    System.err.println("Usage: java IdClient --server <serverhost>");
 	    System.exit(1);
