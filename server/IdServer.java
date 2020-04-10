@@ -17,24 +17,20 @@ public class IdServer implements Identity{
     
     
         public void bind(String name, int registryPort) {
-        try {
-            RMIClientSocketFactory rmiClientSocketFactory = new SslRMIClientSocketFactory();
-            RMIServerSocketFactory rmiServerSocketFactory = new SslRMIServerSocketFactory();
-            Identity server = (Identity) UnicastRemoteObject.exportObject(this, 0, rmiClientSocketFactory,
-                    rmiServerSocketFactory);
-            Registry registry = LocateRegistry.createRegistry(registryPort);
-            registry.rebind(name, server);
-            System.out.println(name + " bound in registry");
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Exception occurred: " + e);
-        }
+	        try {
+	            RMIClientSocketFactory rmiClientSocketFactory = new SslRMIClientSocketFactory();
+	            RMIServerSocketFactory rmiServerSocketFactory = new SslRMIServerSocketFactory();
+	            Identity server = (Identity) UnicastRemoteObject.exportObject(this, 0, rmiClientSocketFactory,
+	                    rmiServerSocketFactory);
+	            Registry registry = LocateRegistry.createRegistry(registryPort);
+	            registry.rebind(name, server);
+	            System.out.println(name + " bound in registry");
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            System.out.println("Exception occurred: " + e);
+	        }
         }
 
-        @Override
-        public int identity(int arg) throws RemoteException {
-            return arg * arg;
-        }
     
         public static void main(String args[]) {
         if (args.length > 0) {
@@ -55,6 +51,13 @@ public class IdServer implements Identity{
             System.out.println("Exception occurred: " + th);
         }
         }
+
+
+		@Override
+		public long Create(int arg) throws RemoteException {
+			// TODO Auto-generated method stub
+			return 0;
+		}
 
         
     }
