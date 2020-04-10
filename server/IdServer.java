@@ -59,6 +59,55 @@ public class IdServer implements Identity{
 			return 0;
 		}
 
+
+		@Override
+		public long Create(int arg, String realname) throws RemoteException {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+
+		@Override
+		public String Lookup(String loginname) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+
+		@Override
+		public String reverseLookup(int UUID) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+
+		@Override
+		public boolean Modify(String oldLoginName, String newLoginName) throws RemoteException {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+
+		@Override
+		public boolean Delete(String loginname) throws RemoteException {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+
+		@Override
+		public String get(Level level) throws RemoteException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+
+		@Override
+		public boolean CheckPassword(String realname, String inputPassword) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
         
     }
     

@@ -47,6 +47,7 @@ public class IdClient
     		.build();
     options.addOption(modify);
     options.addOption("p", "delete", 			true, 	"<loginname> The client contacts the server and requests to delete their loginname. The client must supply the correct password for this operation to succeed.");
+    //when password is required, check that it exists, and then that it is correct before calling any methods.
     options.addOption("d", "password", 			true, 	"<password> password, used with create, modify, and delete commands");
     options.addOption("g", "get", 				true, 	"users|uuids|all  The client contacts the server and obtains either a list all login names, list of all UUIDs or a list of user, UUID and string description all accounts (don’t show encrypted passwords).");
     try {
