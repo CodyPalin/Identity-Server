@@ -8,11 +8,20 @@ import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
-public class IdServer implements Identity{
-    private static int registryPort = 5121;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+public class IdServer extends UnicastRemoteObject implements Identity{
+	private static final long serialVersionUID = 8510789827054962873L;
+    private static int registryPort = 1099; //by default rmiregistry service runs on port 1099
+    private static boolean verbose = false;
+    private String name;
     public IdServer(String s) throws RemoteException {
         super();
+        name = s;
         }
     
     
@@ -33,23 +42,59 @@ public class IdServer implements Identity{
 
     
         public static void main(String args[]) {
-        if (args.length > 0) {
-            registryPort = Integer.parseInt(args[0]);
-        }
-    
-        System.out.println("Setting System Properties....");
-        System.setProperty("javax.net.ssl.keyStore", "../resources/Server_Keystore");
-        // Warning: change to match your password! Also the password should be
-        // stored encrypted in a file outside the program.
-        System.setProperty("javax.net.ssl.keyStorePassword", "test123");
-        System.setProperty("java.security.policy", "../resources/mysecurity.policy");
-        try {
-            IdServer server = new IdServer("IdServer");
-            server.bind("SquareServer", registryPort);
-        } catch (Throwable th) {
-            th.printStackTrace();
-            System.out.println("Exception occurred: " + th);
-        }
+
+	        /*
+	        if (args.length > 0) {
+	            registryPort = Integer.parseInt(args[0]);
+	        }
+	        System.out.println("Setting System Properties....");
+	        System.setProperty("javax.net.ssl.keyStore", "../resources/Server_Keystore");
+	        // Warning: change to match your password! Also the password should be
+	        // stored encrypted in a file outside the program.
+	        System.setProperty("javax.net.ssl.keyStorePassword", "test123");
+	        System.setProperty("java.security.policy", "../resources/mysecurity.policy");
+	        */
+            CommandLineParser parser = new DefaultParser();
+            Options options = new Options();
+            options.addOption("n", "numport", 			true, 	"<password> port number");
+            options.addOption("v","verbose", false, "makes the server print detailed messages on the operations as it executes them.");
+            
+            try {
+        		CommandLine cmd = parser.parse(options, args);
+        		//do stuff with commands here.
+        		if(cmd.hasOption("verbose"))
+        			verbose = true;
+        		if(cmd.hasOption("numport"))
+        		{
+        			String portstring = cmd.getOptionValue("numport");
+        			try{
+        				registryPort = Integer.parseInt(portstring);
+        			}
+        			catch(NumberFormatException e) {
+        				System.err.println( "Parsing failed.  Reason: " + e.getMessage() );
+                        System.exit(1);
+        			}
+        		}
+        	} catch (ParseException e1) {
+                // oops, something went wrong
+                System.err.println( "Parsing failed.  Reason: " + e1.getMessage() );
+                System.exit(1);
+        	}
+            
+	        try {
+		        //System.setProperty("java.security.policy", "../resources/mysecurity.policy");
+	        	//-Djava.security.policy=file:/${workspace_loc:identity-server/mysecurity.policy} //use this in java VM for eclipse if security manager is needed.
+	        	//System.setSecurityManager(new SecurityManager()); 
+	        	
+	        	//using createRegistry instead of getRegistry so we don't have to mess with starting up the registry separately.
+	    	    Registry registry = LocateRegistry.createRegistry(registryPort);
+	            IdServer obj = new IdServer("IdServer");
+	            registry.rebind("IdServer", obj);
+	            System.out.println("IDServer bound in registry");
+	        } catch (Throwable th) {
+	            th.printStackTrace();
+	            System.out.println("Exception occurred: " + th);
+	        }
         }
 
 

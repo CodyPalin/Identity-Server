@@ -30,7 +30,7 @@ public class IdClient
     CommandLineParser parser = new DefaultParser();
     Options options = new Options();
     options.addRequiredOption("s", "server", 			true, 	"<serverhost> server host ip");
-    options.addOption("n", "numport", 			true, 	"<password> port number");
+    options.addOption("n", "numport", 			true, 	"<port#> port number");
     Option create = Option.builder("c")
     		.longOpt("create")
     		.desc("<loginname>  [<real name>] With this option, the client contacts the server and attempts to create the new login name. The client optionally provides the real user name and password along with the request.")

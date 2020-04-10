@@ -1,6 +1,6 @@
 package server;
 
-public interface Identity extends java.rmi.Remote
+public interface Identity extends java.rmi.Remote 
 {
 	//username and password optional? how does this work?
     /**
@@ -49,7 +49,7 @@ public interface Identity extends java.rmi.Remote
      * @param inputPassword
      * @return
      */
-    boolean CheckPassword(String realname, String inputPassword);
+    boolean CheckPassword(String realname, String inputPassword) throws java.rmi.RemoteException;
     
     
 }
