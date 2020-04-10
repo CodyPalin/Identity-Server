@@ -1,0 +1,1 @@
+example code: https://github.com/BoiseState/CS455-resources/tree/master/examples/rmi/ex2-SquareServer
