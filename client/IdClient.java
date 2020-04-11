@@ -37,6 +37,7 @@ static int registryPort = 1099;
 	    		.longOpt("create")
 	    		.desc("<loginname>  [<real name>] With this option, the client contacts the server and attempts to create the new login name. The client optionally provides the real user name and password along with the request.")
 	    		.numberOfArgs(2)
+	    		.optionalArg(true)
 	    		.build();
 	    options.addOption(create);
 	    options.addOption("l", "lookup", 			true, 	"<loginname> With this option, the client connects with the server and looks up the loginname and displays all information found associated with the login name (except for the encrypted password).");
@@ -96,13 +97,16 @@ static int registryPort = 1099;
 	    	}
 	    	String[] v = cmd.getOptionValues('c');
 	    	String loginname = v[0];
-	    	String realname = v[1];
+	    	String realname;
+	    	if(v.length == 2) 
+	    		realname = v[1];
+	    	else
+	    		realname = System.getProperty("user.name");
 	    	System.out.println(stub.Create(loginname, realname, passwordInput));
-	    	
 	    }
 	    else if(cmd.hasOption('l'))
 	    {
-	    	
+	    	cmd.getOptionValues('c');
 	    }
 	    else if(cmd.hasOption('r'))
 	    {
