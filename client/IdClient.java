@@ -106,11 +106,21 @@ static int registryPort = 1099;
 	    }
 	    else if(cmd.hasOption('l'))
 	    {
-	    	cmd.getOptionValues('c');
+	    	String loginname = cmd.getOptionValue('l');
+	    	System.out.println(stub.Lookup(loginname));
 	    }
 	    else if(cmd.hasOption('r'))
 	    {
-	    	
+	    	String uuidString = cmd.getOptionValue('r');
+	    	long uuid = 0;
+	    	try{
+	    		uuid = Long.parseLong(uuidString);
+	    	}
+	    	catch(NumberFormatException e) {
+	    		System.err.println( "Parsing failed.  Reason: " + e.getMessage() );
+                System.exit(1);
+	    	}
+	    	System.out.println(stub.reverseLookup(uuid));
 	    }
 	    else if(cmd.hasOption('m'))
 	    {

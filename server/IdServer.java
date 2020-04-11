@@ -84,7 +84,7 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 
 
 		@Override
-		public String reverseLookup(int UUID) throws RemoteException {
+		public String reverseLookup(long UUID) throws RemoteException {
 			// TODO Auto-generated method stub
 			return null;
 		}

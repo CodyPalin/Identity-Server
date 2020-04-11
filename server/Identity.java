@@ -21,7 +21,7 @@ public interface Identity extends java.rmi.Remote
      * @return
      * @throws java.rmi.RemoteException
      */
-    String reverseLookup(int UUID) throws java.rmi.RemoteException;
+    String reverseLookup(long UUID) throws java.rmi.RemoteException;
     //password
     /**
      * @param oldLoginName
