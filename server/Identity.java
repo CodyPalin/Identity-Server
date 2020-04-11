@@ -1,5 +1,7 @@
 package server;
 
+import javax.naming.NamingException;
+
 /**
  * The Identity Interface, Has necessary methods that the IdServer class must implement
  * @author Cody Palin, Omar Gonzalez
@@ -16,7 +18,7 @@ public interface Identity extends java.rmi.Remote
      * @return The end result is a new UUID is created and stored with the server.
      * @throws java.rmi.RemoteException
      */
-    long Create(String loginname, String realname, String password) throws java.rmi.RemoteException;
+    long Create(String loginname, String realname, String password) throws java.rmi.RemoteException, NamingException;
     
     /**
      * Skeleton method for Lookup, searches for UUID based on loginname.
