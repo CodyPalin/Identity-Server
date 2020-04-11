@@ -193,9 +193,13 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 			if(verbose)
 				System.out.println("deleting login: ");
 			long uuid = logins.get(loginname);
-			
+			if(!logins.containsKey(loginname))
+				return false;
+			logindata.remove(uuid);
+			loginsReverse.remove(uuid);
+			logins.remove(loginname);
 			// TODO Auto-generated method stub
-			return false;
+			return true;
 		}
 
 
