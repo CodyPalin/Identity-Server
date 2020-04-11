@@ -41,7 +41,7 @@ The commandline parser library that's been imported was very useful in making th
 Omar: Started with the initial skeleton of the code framework and attempted to fit it towards the assignment, did the javadocs, and README.md
 Cody: Fit the code towards the assignment, did a large portion of the rmi interactions with IdClient and IdServer.
 
-Video: 
+Video: https://youtu.be/_HAs1Rt6Tkc
 
 ** Misc and Code example **
 example code: https://github.com/BoiseState/CS455-resources/tree/master/examples/rmi/ex2-SquareServer
