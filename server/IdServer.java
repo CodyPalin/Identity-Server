@@ -4,9 +4,13 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.UUID;
+
+import javax.naming.NamingException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -21,8 +25,9 @@ import org.apache.commons.cli.ParseException;
 public class IdServer extends UnicastRemoteObject implements Identity{
 	class Data {
 	    String username;
-	    String passHash;
+	    int passHash;
 	}
+	ArrayList<Data> realusers = new ArrayList<Data>();
 	private static final long serialVersionUID = 8510789827054962873L;
     private static int registryPort = 1099; //by default rmiregistry service runs on port 1099
     private static boolean verbose = false;
@@ -39,6 +44,10 @@ public class IdServer extends UnicastRemoteObject implements Identity{
     public IdServer(String s) throws RemoteException {
         super();
         name = s;
+        Data user = new Data();
+        user.username = "Codyr";
+        user.passHash = "1234".hashCode();
+        realusers.add(user);
         }
     
     
@@ -100,11 +109,20 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 	     * @return The end result is a new UUID is created and stored with the server.
 	     * @throws java.rmi.RemoteException
 	     */
-		public long Create(String loginname, String realname, String password) throws RemoteException {
+		public long Create(String loginname, String realname, String password) throws RemoteException, NamingException {
 			if(verbose)
-				System.out.println("creating new login: ");
-			// TODO Auto-generated method stub
-			return 0;
+				System.out.println("creating new login: "+loginname);
+			long value = UUID.randomUUID().getMostSignificantBits();
+			if(logins.containsKey(loginname)) {
+				throw new NamingException("the login name" + loginname + "already exists in the database");
+			}
+			loginsReverse.put(value, loginname);
+			logins.put(loginname, value);
+			Data data = new Data();
+			data.username = realname;
+			data.passHash = password.hashCode();
+			logindata.put(value, data);
+			return value;
 		}
 		@Override
 		 /**
@@ -115,9 +133,11 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 	     */
 		public String Lookup(String loginname) throws RemoteException {
 			if(verbose)
-				System.out.println("looking up login: ");
+				System.out.println("looking up login: "+loginname);
 			// TODO Auto-generated method stub
-			return null;
+			long uuid = logins.get(loginname);
+			String result = "Login: "+loginname+" UUID: "+uuid+"Created by: "+logindata.get(uuid).username;
+			return result;
 		}
 
 		@Override
@@ -129,8 +149,11 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 	     */
 		public String reverseLookup(long UUID) throws RemoteException {
 			if(verbose)
-				System.out.println("performing reverse lookup: ");
-			return null;
+				System.out.println("performing reverse lookup: "+UUID);
+			if(!loginsReverse.containsKey(UUID))
+				return null;
+			String result = "Login: "+loginsReverse.get(UUID)+" UUID: "+UUID+"Created by: "+logindata.get(UUID).username;
+			return result;
 		}
 
 
@@ -140,14 +163,21 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 	     * @param oldLoginName The oldloginname the UUID had associated with.
 	     * @param newLoginName The newloginname the UUID will be associated with.
 	     * @param password The password required and must match the UUID's password to validate the change of login names.
-	     * @return Should return nothing
+	     * @return returns true if modified successfully, false otherwise
 	     * @throws java.rmi.RemoteException
 	     */
 		public boolean Modify(String oldLoginName, String newLoginName, String password) throws RemoteException {
 			if(verbose)
 				System.out.println("modifying login: ");
-			// TODO Auto-generated method stub
-			return false;
+			long uuid = logins.get(oldLoginName);
+			if(logindata.get(uuid).passHash != password.hashCode())
+				return false;
+			if(!loginsReverse.replace(uuid,oldLoginName, newLoginName))
+				return false;
+			logins.remove(oldLoginName);
+			logins.put(newLoginName, uuid);
+			
+			return true;
 		}
 
 
@@ -156,12 +186,14 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 	     * Searches for the matching loginname, then verifies if the password matches and then will delete the UUID
 	     * @param loginname the loginname that is connected to a uuid that will be removed.
 	     * @param password The password that must match to the uuid
-	     * @return Nothing returns, the UUID is removed
+	     * @return returns true if the UUID is removed, false otherwise
 	     * @throws java.rmi.RemoteException
 	     */
 		public boolean Delete(String loginname, String password) throws RemoteException {
 			if(verbose)
 				System.out.println("deleting login: ");
+			long uuid = logins.get(loginname);
+			
 			// TODO Auto-generated method stub
 			return false;
 		}
@@ -173,7 +205,20 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 		 */
 		public String get(Level level) throws RemoteException {
 			if(verbose)
-				System.out.println("getting all info: ");
+				System.out.println("getting all info at level: "+level);
+			switch(level){
+				case users:
+					return logins.keySet().toString();
+				case uuids:
+					return loginsReverse.keySet().toString();
+				case all:
+					String result="";
+					for(Long l : loginsReverse.keySet())
+					{
+						result+=loginsReverse.get(l)+" : "+l+" : user-"+logindata.get(l).username+"\r\n";
+					}
+					return result;
+			}
 			// TODO Auto-generated method stub
 			return "get all info for " +level.toString();
 		}

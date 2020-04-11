@@ -81,7 +81,7 @@ static int registryPort = 1099;
 	    System.setProperty("javax.net.ssl.trustStore", "../resources/Client_Truststore");
 	    System.setProperty("java.security.policy", "../resources/mysecurity.policy");
 	    /* System.setSecurityManager(new RMISecurityManager()); */
-	
+	    
 	    try {
 	    Registry registry = LocateRegistry.getRegistry(host, registryPort);
 	    Identity stub = (Identity) registry.lookup("IdServer");
