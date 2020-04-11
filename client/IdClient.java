@@ -17,6 +17,12 @@ import server.Identity.Level;
 
 //import rmisslex2.server.Square;
 
+/**
+ * Client Method for interacting with IdServer. Uses the terminal and the client reads the arguments. 
+ * Then the client will interact with the server to perform the commands or queries once connected 
+ * @author Cody Palin, Omar Gonzalez
+ *
+ */
 public class IdClient
 {
 static int registryPort = 1099;
@@ -26,7 +32,8 @@ static int registryPort = 1099;
 
 
     /**
-     * @param args java IdClient --server <serverhost> [--numport <port#>] <query>
+     * Main method, depending on arguments used, can perform actions and interact with the IdServer
+     * @param args java IdClient --server <serverhost> [--numport <port#>] <query> //Arguments and based on <query> will perform different commands such as creating an account, looking up a username or more.
      */
     public static void main(String[] args) {
 	    CommandLineParser parser = new DefaultParser();
@@ -51,7 +58,7 @@ static int registryPort = 1099;
 	    options.addOption("d", "delete", 			true, 	"<loginname> The client contacts the server and requests to delete their loginname. The client must supply the correct password for this operation to succeed.");
 	    //when password is required, check that it exists, and then that it is correct before calling any methods.
 	    options.addOption("p", "password", 			true, 	"<password> password, used with create, modify, and delete commands");
-	    options.addOption("g", "get", 				true, 	"users|uuids|all  The client contacts the server and obtains either a list all login names, list of all UUIDs or a list of user, UUID and string description all accounts (don’t show encrypted passwords).");
+	    options.addOption("g", "get", 				true, 	"users|uuids|all  The client contacts the server and obtains either a list all login names, list of all UUIDs or a list of user, UUID and string description all accounts (donï¿½t show encrypted passwords).");
 	    CommandLine cmd = null;
 	    try {
 			cmd = parser.parse(options, args);
