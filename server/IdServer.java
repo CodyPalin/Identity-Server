@@ -3,11 +3,7 @@ package server;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.RMIClientSocketFactory;
-import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
-import javax.rmi.ssl.SslRMIClientSocketFactory;
-import javax.rmi.ssl.SslRMIServerSocketFactory;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -26,35 +22,12 @@ public class IdServer extends UnicastRemoteObject implements Identity{
         }
     
     
-        public void bind(String name, int registryPort) {
-	        try {
-	            RMIClientSocketFactory rmiClientSocketFactory = new SslRMIClientSocketFactory();
-	            RMIServerSocketFactory rmiServerSocketFactory = new SslRMIServerSocketFactory();
-	            Identity server = (Identity) UnicastRemoteObject.exportObject(this, 0, rmiClientSocketFactory,
-	                    rmiServerSocketFactory);
-	            Registry registry = LocateRegistry.createRegistry(registryPort);
-	            registry.rebind(name, server);
-	            System.out.println(name + " bound in registry");
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	            System.out.println("Exception occurred: " + e);
-	        }
-        }
+        
 
     
         public static void main(String args[]) {
 
-	        /*
-	        if (args.length > 0) {
-	            registryPort = Integer.parseInt(args[0]);
-	        }
-	        System.out.println("Setting System Properties....");
-	        System.setProperty("javax.net.ssl.keyStore", "../resources/Server_Keystore");
-	        // Warning: change to match your password! Also the password should be
-	        // stored encrypted in a file outside the program.
-	        System.setProperty("javax.net.ssl.keyStorePassword", "test123");
-	        System.setProperty("java.security.policy", "../resources/mysecurity.policy");
-	        */
+	        
             CommandLineParser parser = new DefaultParser();
             Options options = new Options();
             options.addOption("n", "numport", 			true, 	"<password> port number");
@@ -98,21 +71,11 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 	        }
         }
 
-
 		@Override
-		public long Create(int arg) throws RemoteException {
+		public long Create(String loginname, String realname, String password) throws RemoteException {
 			// TODO Auto-generated method stub
 			return 0;
 		}
-
-
-		@Override
-		public long Create(int arg, String realname) throws RemoteException {
-			// TODO Auto-generated method stub
-			return 0;
-		}
-
-
 		@Override
 		public String Lookup(String loginname) throws RemoteException {
 			// TODO Auto-generated method stub
@@ -128,14 +91,14 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 
 
 		@Override
-		public boolean Modify(String oldLoginName, String newLoginName) throws RemoteException {
+		public boolean Modify(String oldLoginName, String newLoginName, String password) throws RemoteException {
 			// TODO Auto-generated method stub
 			return false;
 		}
 
 
 		@Override
-		public boolean Delete(String loginname) throws RemoteException {
+		public boolean Delete(String loginname, String password) throws RemoteException {
 			// TODO Auto-generated method stub
 			return false;
 		}
@@ -148,11 +111,10 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 		}
 
 
-		@Override
-		public boolean CheckPassword(String realname, String inputPassword) {
-			// TODO Auto-generated method stub
-			return false;
-		}
+
+
+
+		
 
         
     }
