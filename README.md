@@ -21,8 +21,8 @@ Spring 2020
 
 ** Building and Running **
     Building:
-        1. Enter the Identity Server Directory.
-        2. Run the Makefile
+        1. Enter the Identity Server Directory and find the build.xml file from ant.
+        2. do ant -d build
     Running:
         3. To run the server do java IdServer
         4. Then to run a client to see if IdServer works, do java IdClient
