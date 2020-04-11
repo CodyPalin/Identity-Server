@@ -102,7 +102,7 @@ public class IdServer extends UnicastRemoteObject implements Identity{
         
 		@Override
 		 /**
-	     * Creates a new Account or UUID given login name, realname and password are optional.
+	     * Creates a new Account or UUID given login name, realname and password are required.
 	     * @param loginname the login name the account will use
 	     * @param realname The user behind the login name
 	     * @param password The password the account will use
@@ -112,6 +112,15 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 		public long Create(String loginname, String realname, String password) throws RemoteException, NamingException {
 			if(verbose)
 				System.out.println("creating new login: "+loginname);
+			boolean validuser = false;
+			for(Data d : realusers) {
+				if(d.username.equals(realname) && password.hashCode()==d.passHash) {
+					validuser = true;
+				}
+			}
+			if(!validuser)
+				return 0;
+				
 			long value = UUID.randomUUID().getMostSignificantBits();
 			if(logins.containsKey(loginname)) {
 				throw new NamingException("the login name" + loginname + "already exists in the database");
@@ -136,7 +145,7 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 				System.out.println("looking up login: "+loginname);
 			// TODO Auto-generated method stub
 			long uuid = logins.get(loginname);
-			String result = "Login: "+loginname+" UUID: "+uuid+"Created by: "+logindata.get(uuid).username;
+			String result = "Login: "+loginname+" UUID: "+uuid+" Created by: "+logindata.get(uuid).username;
 			return result;
 		}
 
@@ -152,7 +161,7 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 				System.out.println("performing reverse lookup: "+UUID);
 			if(!loginsReverse.containsKey(UUID))
 				return null;
-			String result = "Login: "+loginsReverse.get(UUID)+" UUID: "+UUID+"Created by: "+logindata.get(UUID).username;
+			String result = "Login: "+loginsReverse.get(UUID)+" UUID: "+UUID+" Created by: "+logindata.get(UUID).username;
 			return result;
 		}
 
@@ -193,6 +202,8 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 			if(verbose)
 				System.out.println("deleting login: ");
 			long uuid = logins.get(loginname);
+			if(logindata.get(uuid).passHash != password.hashCode())
+				return false;
 			if(!logins.containsKey(loginname))
 				return false;
 			logindata.remove(uuid);

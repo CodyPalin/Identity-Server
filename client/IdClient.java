@@ -109,7 +109,11 @@ static int registryPort = 1099;
 	    		realname = v[1];
 	    	else
 	    		realname = System.getProperty("user.name");
-	    	System.out.println("Successfully created a new UUID for this login: "+ stub.Create(loginname, realname, passwordInput));
+	    	long val = stub.Create(loginname, realname, passwordInput);
+	    	if(val != 0)
+	    		System.out.println("Successfully created a new UUID for this login: "+ val);
+	    	else
+	    		System.out.println("failed to create a new UUID");
 	    }
 	    else if(cmd.hasOption('l'))
 	    {
