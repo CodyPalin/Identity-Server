@@ -19,6 +19,7 @@ public class IdServer extends UnicastRemoteObject implements Identity{
     private static int registryPort = 1099; //by default rmiregistry service runs on port 1099
     private static boolean verbose = false;
     private String name;
+    static Registry registry;
     public IdServer(String s) throws RemoteException {
         super();
         name = s;
@@ -87,9 +88,9 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 	        	//System.setSecurityManager(new SecurityManager()); 
 	        	
 	        	//using createRegistry instead of getRegistry so we don't have to mess with starting up the registry separately.
-	    	    Registry registry = LocateRegistry.createRegistry(registryPort);
+	    	    registry = LocateRegistry.createRegistry(registryPort);
 	            IdServer obj = new IdServer("IdServer");
-	            registry.rebind("IdServer", obj);
+	            registry.bind("IdServer", obj);
 	            System.out.println("IDServer bound in registry");
 	        } catch (Throwable th) {
 	            th.printStackTrace();
@@ -143,7 +144,7 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 		@Override
 		public String get(Level level) throws RemoteException {
 			// TODO Auto-generated method stub
-			return null;
+			return "get all info for " +level.toString();
 		}
 
 
