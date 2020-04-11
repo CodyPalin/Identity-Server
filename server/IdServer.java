@@ -4,6 +4,9 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -11,10 +14,17 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 public class IdServer extends UnicastRemoteObject implements Identity{
+	class Data {
+	    String username;
+	    String passHash;
+	}
 	private static final long serialVersionUID = 8510789827054962873L;
     private static int registryPort = 1099; //by default rmiregistry service runs on port 1099
     private static boolean verbose = false;
     private String name;
+    private HashMap<Long, String> loginsReverse = new HashMap<Long, String>();
+    private HashMap<String, Long> logins = new HashMap<String, Long>();
+    private HashMap<Long, Data> logindata = new HashMap<Long, Data>();
     static Registry registry;
     public IdServer(String s) throws RemoteException {
         super();
@@ -70,14 +80,18 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 	            System.out.println("Exception occurred: " + th);
 	        }
         }
-
+        
 		@Override
 		public long Create(String loginname, String realname, String password) throws RemoteException {
+			if(verbose)
+				System.out.println("creating new login: ");
 			// TODO Auto-generated method stub
 			return 0;
 		}
 		@Override
 		public String Lookup(String loginname) throws RemoteException {
+			if(verbose)
+				System.out.println("looking up login: ");
 			// TODO Auto-generated method stub
 			return null;
 		}
@@ -85,13 +99,16 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 
 		@Override
 		public String reverseLookup(long UUID) throws RemoteException {
-			// TODO Auto-generated method stub
+			if(verbose)
+				System.out.println("performing reverse lookup: ");
 			return null;
 		}
 
 
 		@Override
 		public boolean Modify(String oldLoginName, String newLoginName, String password) throws RemoteException {
+			if(verbose)
+				System.out.println("modifying login: ");
 			// TODO Auto-generated method stub
 			return false;
 		}
@@ -99,6 +116,8 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 
 		@Override
 		public boolean Delete(String loginname, String password) throws RemoteException {
+			if(verbose)
+				System.out.println("deleting login: ");
 			// TODO Auto-generated method stub
 			return false;
 		}
@@ -106,6 +125,8 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 
 		@Override
 		public String get(Level level) throws RemoteException {
+			if(verbose)
+				System.out.println("getting all info: ");
 			// TODO Auto-generated method stub
 			return "get all info for " +level.toString();
 		}

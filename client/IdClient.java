@@ -102,7 +102,7 @@ static int registryPort = 1099;
 	    		realname = v[1];
 	    	else
 	    		realname = System.getProperty("user.name");
-	    	System.out.println(stub.Create(loginname, realname, passwordInput));
+	    	System.out.println("Successfully created a new UUID for this login: "+ stub.Create(loginname, realname, passwordInput));
 	    }
 	    else if(cmd.hasOption('l'))
 	    {
@@ -124,15 +124,44 @@ static int registryPort = 1099;
 	    }
 	    else if(cmd.hasOption('m'))
 	    {
+	    	if(!hasPassword)
+	    	{
+	    		System.err.println("password is required for modifying a login");
+	    		System.exit(1);
+	    	}
+
+	    	String[] v = cmd.getOptionValues('m');
+	    	if(stub.Modify(v[0], v[1], passwordInput))
+	    	{
+	    		System.out.println("Login name modified successfully.");
+	    	}
+	    	else {
+	    		System.err.println("Login name modification failed.");
+	    	}
 	    	
 	    }
 	    else if(cmd.hasOption('d'))
 	    {
+	    	if(!hasPassword)
+	    	{
+	    		System.err.println("password is required for deleting a login");
+	    		System.exit(1);
+	    	}
+
+	    	String loginname = cmd.getOptionValue('d');
+	    	if(stub.Delete(loginname, passwordInput))
+	    	{
+	    		System.out.println("Login name deleted successfully.");
+	    	}
+	    	else {
+	    		System.err.println("Login name deletion failed.");
+	    	}
 	    	
 	    }
 	    else if(cmd.hasOption('g'))
 	    {
-	    	System.out.println(stub.get(Level.valueOf(cmd.getOptionValue('g'))));
+	    	Level l = Level.valueOf(cmd.getOptionValue('g'));
+	    	System.out.println(stub.get(l));
 	    }
 		} catch (Exception e) {
 		    System.err.println("Client exception: " + e.toString());
