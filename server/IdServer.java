@@ -1,5 +1,13 @@
 package server;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -8,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import javax.naming.NamingException;
@@ -17,14 +27,20 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+
+
 /**
  * The IdServer class, handles the methods for the accounts, stores, manages the accounts and returns what the IdClient requests
  * @author Cody Palin, Omar Gonzalez
  *
  */
 public class IdServer extends UnicastRemoteObject implements Identity{
-	class Data {
-	    String username;
+	class Data implements Serializable{
+	    /**
+		 * 
+		 */
+		private static final long serialVersionUID = -209569222800945680L;
+		String username;
 	    int passHash;
 	}
 	ArrayList<Data> realusers = new ArrayList<Data>();
@@ -36,6 +52,49 @@ public class IdServer extends UnicastRemoteObject implements Identity{
     private HashMap<String, Long> logins = new HashMap<String, Long>();
     private HashMap<Long, Data> logindata = new HashMap<Long, Data>();
     static Registry registry;
+	volatile static Timer timer;
+	volatile static TimerTask task;
+	
+    class MyTimerTask extends TimerTask{
+
+		@Override
+		public void run() {
+			// TODO Auto-generated method stub
+			State state = new State(loginsReverse, logins, logindata, realusers);
+    		FileOutputStream fout;
+			try {
+				fout = new FileOutputStream("./state.ser");
+	    		ObjectOutputStream oos;
+				oos = new ObjectOutputStream(fout);
+	    		oos.writeObject(state);
+	    		oos.close();
+	    		fout.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		}
+    	
+    }
+    public class State implements Serializable{
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 757474264047726727L;
+    	public HashMap<Long, String> loginsReverse;
+    	public HashMap<String, Long> logins;
+    	public HashMap<Long, Data> logindata;
+    	public ArrayList<Data> realusers;
+		public State(HashMap<Long, String> loginsReverse, HashMap<String, Long> logins, HashMap<Long, Data> logindata, ArrayList<Data> realusers) {
+			this.loginsReverse = loginsReverse;
+			this.logins = logins;
+			this.logindata = logindata;
+			this.realusers = realusers;
+		}
+    	
+    }
+    
     /**
      * Creates IdServer
      * @param s
@@ -46,13 +105,39 @@ public class IdServer extends UnicastRemoteObject implements Identity{
         name = s;
         Data user = new Data();
         user.username = "Codyr";
-        user.passHash = "1234".hashCode();
+        user.passHash = "1234".hashCode(); 
         realusers.add(user);
+        File stateFile = new File("./state.ser");
+        if(stateFile.exists()) 
+        {
+        	FileInputStream fin;
+			try {
+				fin = new FileInputStream("./state.ser");
+				ObjectInputStream oin = new ObjectInputStream(fin); 
+				State loadedState = (State)(oin.readObject());
+				realusers = loadedState.realusers;
+				logins = loadedState.logins;
+				loginsReverse = loadedState.loginsReverse;
+				logindata = loadedState.logindata;
+				
+			} catch ( IOException | ClassNotFoundException e) {
+				e.printStackTrace();
+				System.exit(1);
+			} 
         }
-    
-    
-        
-
+        else {
+        	try {
+				stateFile.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.exit(1);
+			}
+        }
+        task = new MyTimerTask();
+		timer = new Timer();
+		timer.scheduleAtFixedRate(task, 0, 1000);
+        }    
     
         public static void main(String args[]) {
 
@@ -113,13 +198,10 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 			if(verbose)
 				System.out.println("creating new login: "+loginname);
 			boolean validuser = false;
-			for(Data d : realusers) {
-				if(d.username.equals(realname) && password.hashCode()==d.passHash) {
-					validuser = true;
-				}
-			}
-			if(!validuser)
-				return 0;
+			Data user = new Data();
+			user.username = realname;
+			user.passHash = password.hashCode();
+			realusers.add(user);
 				
 			long value = UUID.randomUUID().getMostSignificantBits();
 			if(logins.containsKey(loginname)) {
@@ -127,10 +209,7 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 			}
 			loginsReverse.put(value, loginname);
 			logins.put(loginname, value);
-			Data data = new Data();
-			data.username = realname;
-			data.passHash = password.hashCode();
-			logindata.put(value, data);
+			logindata.put(value, user);
 			return value;
 		}
 		@Override
