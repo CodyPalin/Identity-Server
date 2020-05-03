@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -183,6 +185,14 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 	            th.printStackTrace();
 	            System.out.println("Exception occurred: " + th);
 	        }
+	        InetAddress inetAddress = null;
+				try {
+					inetAddress = InetAddress.getLocalHost();
+				} catch (UnknownHostException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        System.out.println("IP Address:- " + inetAddress.getHostAddress());
         }
         
 		@Override
