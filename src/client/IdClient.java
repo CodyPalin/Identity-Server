@@ -2,7 +2,6 @@ package client;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.UUID;
 
 import org.apache.commons.cli.CommandLine;
 //import command line parser (need to import jar files if you see errors here, see readme)
@@ -86,7 +85,7 @@ static int registryPort = 1099;
 	    Registry registry = LocateRegistry.getRegistry(host, registryPort);
 	    Identity stub = (Identity) registry.lookup("IdServer");
 	    
-	    int result = 0;
+	    //int result = 0;
 		//result = stub.identity(value); can call functions from server like this
 	    String passwordInput = "";
 	    boolean hasPassword = false;
