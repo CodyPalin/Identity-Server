@@ -2,22 +2,21 @@ package server;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.MulticastSocket;
+import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -121,6 +120,8 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 				logins = loadedState.logins;
 				loginsReverse = loadedState.loginsReverse;
 				logindata = loadedState.logindata;
+				oin.close();
+				fin.close();
 				
 			} catch ( IOException | ClassNotFoundException e) {
 				e.printStackTrace();
@@ -142,8 +143,7 @@ public class IdServer extends UnicastRemoteObject implements Identity{
         }    
     
         public static void main(String args[]) {
-
-	        
+        	
             CommandLineParser parser = new DefaultParser();
             Options options = new Options();
             options.addOption("n", "numport", 			true, 	"<password> port number");
@@ -193,6 +193,7 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 					e.printStackTrace();
 				}
 	        System.out.println("IP Address:- " + inetAddress.getHostAddress());
+	        System.out.println("Host Name:- " + inetAddress.getHostName());
         }
         
 		@Override
@@ -207,7 +208,6 @@ public class IdServer extends UnicastRemoteObject implements Identity{
 		public long Create(String loginname, String realname, String password) throws RemoteException, NamingException {
 			if(verbose)
 				System.out.println("creating new login: "+loginname);
-			boolean validuser = false;
 			Data user = new Data();
 			user.username = realname;
 			user.passHash = password.hashCode();
