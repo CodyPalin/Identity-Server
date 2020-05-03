@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. --><project basedir="." default="build" name="identity-server">
+    <property environment="env"/>
+    <property name="workspace_loc:identity-server/bin/" value="bin"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.8"/>
+    <property name="source" value="1.8"/>
+    <path id="identity-server.classpath">
+        <pathelement location="bin"/>
+        <pathelement location="src/commons-cli-1.4-javadoc.jar"/>
+        <pathelement location="src/commons-cli-1.4.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="bin"/>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="bin"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="identity-server.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target name="IdClient">
+        <java classname="client.IdClient" failonerror="true" fork="yes">
+            <arg line="-s localhost -r 5421706247690077289 -p 1234"/>
+            <classpath refid="identity-server.classpath"/>
+        </java>
+    </target>
+    <target name="IdServer">
+        <java classname="server.IdServer" failonerror="true" fork="yes">
+            <jvmarg line="-Djava.rmi.server.codebase=file:/${workspace_loc:identity-server/bin/}"/>
+            <arg line="--verbose"/>
+            <classpath refid="identity-server.classpath"/>
+        </java>
+    </target>
+    <target name="IdClient_rlookup">
+        <java classname="client.IdClient" failonerror="true" fork="yes">
+            <arg line="-s localhost -r -5612285710593667452"/>
+            <classpath refid="identity-server.classpath"/>
+        </java>
+    </target>
+    <target name="IdClient_modify">
+        <java classname="client.IdClient" failonerror="true" fork="yes">
+            <arg line="-s localhost -m Omar omar -p 1234"/>
+            <classpath refid="identity-server.classpath"/>
+        </java>
+    </target>
+    <target name="IdClient_create">
+        <java classname="client.IdClient" failonerror="true" fork="yes">
+            <arg line="-s localhost -c codylogin Codyr -p 1234"/>
+            <classpath refid="identity-server.classpath"/>
+        </java>
+    </target>
+    <target name="IdClient_lookup">
+        <java classname="client.IdClient" failonerror="true" fork="yes">
+            <arg line="-s localhost -l Omar"/>
+            <classpath refid="identity-server.classpath"/>
+        </java>
+    </target>
+    <target name="IdClient_delete">
+        <java classname="client.IdClient" failonerror="true" fork="yes">
+            <arg line="-s localhost -d codylogin -p 1234"/>
+            <classpath refid="identity-server.classpath"/>
+        </java>
+    </target>
+    <target name="IdClient_getusers">
+        <java classname="client.IdClient" failonerror="true" fork="yes">
+            <arg line="-s localhost -g users -p 1234"/>
+            <classpath refid="identity-server.classpath"/>
+        </java>
+    </target>
+    <target name="IdClient_getall">
+        <java classname="client.IdClient" failonerror="true" fork="yes">
+            <arg line="-s localhost -g all -p 1234"/>
+            <classpath refid="identity-server.classpath"/>
+        </java>
+    </target>
+    <target name="IdClient_getuuids">
+        <java classname="client.IdClient" failonerror="true" fork="yes">
+            <arg line="-s localhost -g uuids -p 1234"/>
+            <classpath refid="identity-server.classpath"/>
+        </java>
+    </target>
+</project>
