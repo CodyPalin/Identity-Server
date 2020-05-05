@@ -3,6 +3,8 @@ package server;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
+import server.IdServer.State;
+
 public interface ServerCommunication extends java.rmi.Remote{
 	/**
 	 * sets up communications with all servers
@@ -17,4 +19,6 @@ public interface ServerCommunication extends java.rmi.Remote{
 	void StartElection() throws java.rmi.RemoteException;
 	void SendElectionMessage(ArrayList<Integer> ids) throws java.rmi.RemoteException;
 	void SendCoordinatorMessage(int originatorID, int coordinatorID) throws java.rmi.RemoteException;
+	boolean AreYouAlive() throws java.rmi.RemoteException;
+	void SendState(State recievedState, ArrayList<InetAddress> inetAddresses, int coordinatorID) throws java.rmi.RemoteException;
 }

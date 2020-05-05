@@ -43,7 +43,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		String username;
 	    int passHash;
 	}
-	ArrayList<Data> realusers = new ArrayList<Data>();
 	private static final long serialVersionUID = 8510789827054962873L;
     private static int registryPort = 1099; //by default rmiregistry service runs on port 1099
     private static boolean verbose = false;
@@ -55,9 +54,12 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
     private HashMap<Long, String> loginsReverse = new HashMap<Long, String>();
     private HashMap<String, Long> logins = new HashMap<String, Long>();
     private HashMap<Long, Data> logindata = new HashMap<Long, Data>();
+	ArrayList<Data> realusers = new ArrayList<Data>();
     static Registry registry;
 	volatile static Timer timer;
 	volatile static TimerTask task;
+	volatile static Timer alivetimer;
+	volatile static TimerTask alivetask;
 	
     class MyTimerTask extends TimerTask{
 
@@ -65,6 +67,21 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		public void run() {
 			// TODO Auto-generated method stub
 			State state = new State(loginsReverse, logins, logindata, realusers);
+			if(myID == coordinatorID) {
+				int nextid = incrementID(myID);
+				while(nextid != myID) {
+					try {	
+						Registry registry = LocateRegistry.getRegistry(allIPs.get(nextid).getHostAddress(), registryPort);
+				
+					    ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
+					    stub.SendState(state, allIPs, coordinatorID);
+					    return;
+					} catch (RemoteException | NotBoundException e) {
+						System.err.println("Server with ID: "+nextid+" not responding");
+					}
+					nextid = incrementID(nextid);
+				}
+			}
     		FileOutputStream fout;
 			try {
 				fout = new FileOutputStream("./state.ser");
@@ -76,6 +93,37 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.exit(1);
+			}
+		}
+    	
+    }
+    class AliveTimerTask extends TimerTask{
+
+		@Override
+		public void run() {
+			if(coordinatorID == -1)
+			{
+				System.err.println("There is currently no coordinator");
+				return;
+			}
+			boolean alive = false;
+			try {
+				Registry registry = LocateRegistry.getRegistry(allIPs.get(coordinatorID).getHostAddress(), registryPort);
+				
+		    	ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
+	    	
+				alive = stub.AreYouAlive();
+			} catch (RemoteException | NotBoundException e) {
+				alive = false;
+			}
+			
+			if(!alive) {
+				try {
+					StartElection();
+				} catch (RemoteException e) {
+					System.err.println("failed to start election");
+					e.printStackTrace();
+				}
 			}
 		}
     	
@@ -142,7 +190,11 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
         }
         task = new MyTimerTask();
 		timer = new Timer();
-		timer.scheduleAtFixedRate(task, 0, 1000);
+		timer.scheduleAtFixedRate(task, 0, 3000);
+
+        alivetask = new AliveTimerTask();
+		alivetimer = new Timer();
+		alivetimer.scheduleAtFixedRate(alivetask, 0, 5000);
         }    
     
     public static void main(String args[]) {
@@ -228,7 +280,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-			    Create(loginname, realname, password);
+			    return Create(loginname, realname, password);
 			}
 		}
 		if(verbose)
@@ -272,7 +324,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-			    Lookup(loginname);
+			    return Lookup(loginname);
 			}
 		}
 		if(verbose)
@@ -308,7 +360,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-			    reverseLookup(UUID);
+			    return reverseLookup(UUID);
 			}
 		}
 		if(verbose)
@@ -347,7 +399,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-			    Modify(oldLoginName, newLoginName, password);
+			    return Modify(oldLoginName, newLoginName, password);
 			}
 		}
 		if(verbose)
@@ -390,7 +442,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-			    Delete(loginname, password);
+			    return Delete(loginname, password);
 			}
 		}
 		if(verbose)
@@ -430,7 +482,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-			    get(level);
+			    return get(level);
 			}
 		}
 		if(verbose)
@@ -464,9 +516,17 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 	}
 
 	@Override
-	public void StartElection() throws RemoteException {
+	public void StartElection() throws RemoteException{
+		if(verbose) {
+			System.out.println("Starting an election");
+		}
 		ArrayList<Integer> ids = new ArrayList<Integer>();
-		SendElectionMessage(ids);
+		try {
+			SendElectionMessage(ids);
+		} catch (RemoteException e) {
+			System.err.println("failed to start election");
+			e.printStackTrace();
+		}
 		
 	}
 
@@ -543,6 +603,43 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 				}
 				nextid = incrementID(nextid);
 			}
+		}
+	}
+
+	@Override
+	public boolean AreYouAlive() throws RemoteException {
+		return true;
+	}
+
+	@Override
+	public void SendState(State recievedState, ArrayList<InetAddress> inetAddresses, int coordinatorID) throws RemoteException {
+		if(myID == coordinatorID)
+		{
+			//states synchronized
+			return;
+		}
+		if(coordinatorID == -1) {
+			//this means I have crashed and other servers are still running
+			this.allIPs = inetAddresses;
+			this.coordinatorID = coordinatorID;
+		}
+		loginsReverse = recievedState.loginsReverse;
+		logins = recievedState.logins;
+		logindata = recievedState.logindata;
+		realusers = recievedState.realusers;
+		
+		int nextid = incrementID(myID);
+		while(nextid != myID) {
+			try {	
+				Registry registry = LocateRegistry.getRegistry(allIPs.get(nextid).getHostAddress(), registryPort);
+		
+			    ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
+			    stub.SendState(recievedState, inetAddresses, coordinatorID);
+			    return;
+			} catch (RemoteException | NotBoundException e) {
+				System.err.println("Server with ID: "+nextid+" not responding");
+			}
+			nextid = incrementID(nextid);
 		}
 	}
 
