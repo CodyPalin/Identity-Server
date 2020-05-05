@@ -46,6 +46,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
     private static InetAddress myIP;
     private int myID;
     private int coordinatorID = -1;
+    private Registry coordinatorRegistry;
     private HashMap<Long, String> loginsReverse = new HashMap<Long, String>();
     private HashMap<String, Long> logins = new HashMap<String, Long>();
     private HashMap<Long, Data> logindata = new HashMap<Long, Data>();
@@ -88,7 +89,8 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			}
 			boolean alive = false;
 			try {
-				Registry registry = LocateRegistry.getRegistry(allIPs.get(coordinatorID).getHostAddress(), registryPort);
+				if(coordinatorRegistry == null)
+					coordinatorRegistry = LocateRegistry.getRegistry(allIPs.get(coordinatorID).getHostAddress(), registryPort);
 				
 		    	ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
 	    	
@@ -181,7 +183,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 
         alivetask = new AliveTimerTask();
 		alivetimer = new Timer();
-		alivetimer.scheduleAtFixedRate(alivetask, 0, 5000);
+		alivetimer.scheduleAtFixedRate(alivetask, 0, 1000);
         }    
     
     public static void main(String args[]) {
@@ -557,6 +559,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		else 
 		{
 			this.coordinatorID = -1;
+			coordinatorRegistry = null;
 			ids.add(myID);
 			int nextid = incrementID(myID);
 			while(nextid != myID) {
@@ -580,6 +583,9 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 
 	@Override
 	public void SendCoordinatorMessage(int originatorID, int coordinatorID) throws RemoteException {
+		if(verbose) {
+			System.out.println(coordinatorID + " is coordinator.");
+		}
 		if(originatorID == myID && this.coordinatorID != -1) {
 			//no more messages needed
 			if(verbose)
