@@ -7,7 +7,7 @@ fi
 echo "Launching $1 servers..."
 for ((i=1; i <= $1; ++i))
 do 
-    x-terminal-emulator -e "echo $pass | sudo -S docker run --name="idserver${i}" --hostname="idserver${i}" identityimage:1.1"
+    x-terminal-emulator -e "echo $pass | sudo -S docker run --name="idserver${i}" --hostname="idserver${i}" identityimage:1.1;bash"
 done
 sleep 8
 echo "Retrieving IPs..."

@@ -1,0 +1,1 @@
+(cd bin && java -cp commons-cli-1.4.jar:.: server.SetupCommunication -f ../docker/IPlist.txt)
