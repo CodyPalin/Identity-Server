@@ -66,9 +66,11 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
 			State state = new State(loginsReverse, logins, logindata, realusers);
 			if(myID == coordinatorID) {
+				if(verbose) {
+					System.out.println("Sending state.");
+				}
 				int nextid = incrementID(myID);
 				while(nextid != myID) {
 					try {	
@@ -76,7 +78,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 				
 					    ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
 					    stub.SendState(state, allIPs, coordinatorID);
-					    return;
+					    break;
 					} catch (RemoteException | NotBoundException e) {
 						System.err.println("Server with ID: "+nextid+" not responding");
 					} catch (ClassCastException e) {
@@ -106,7 +108,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		public void run() {
 			if(coordinatorID == -1)
 			{
-				System.err.println("There is currently no coordinator");
+				//System.err.println("There is currently no coordinator");
 				return;
 			}
 			boolean alive = false;
@@ -186,7 +188,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
         	try {
 				stateFile.createNewFile();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				System.exit(1);
 			}
@@ -247,7 +248,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		try {
 			inetAddress = InetAddress.getLocalHost();
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		myIP = inetAddress;
@@ -280,7 +280,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			    try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			    return Create(loginname, realname, password);
@@ -324,7 +323,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			    try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			    return Lookup(loginname);
@@ -332,7 +330,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		}
 		if(verbose)
 			System.out.println("looking up login: "+loginname);
-		// TODO Auto-generated method stub
 		long uuid = logins.get(loginname);
 		String result = "Login: "+loginname+" UUID: "+uuid+" Created by: "+logindata.get(uuid).username;
 		return result;
@@ -360,7 +357,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			    try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			    return reverseLookup(UUID);
@@ -399,7 +395,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			    try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			    return Modify(oldLoginName, newLoginName, password);
@@ -442,7 +437,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			    try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			    return Delete(loginname, password);
@@ -458,7 +452,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		logindata.remove(uuid);
 		loginsReverse.remove(uuid);
 		logins.remove(loginname);
-		// TODO Auto-generated method stub
 		return true;
 	}
 
@@ -482,7 +475,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			    try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			    return get(level);
@@ -503,13 +495,11 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 				}
 				return result;
 		}
-		// TODO Auto-generated method stub
 		return "get all info for " +level.toString();
 	}
 
 	@Override
 	public void SetupCommunication(ArrayList<InetAddress> inetAddresses) throws RemoteException {
-		// TODO Auto-generated method stub
 		if(verbose)
 			System.out.println("Got IP list:");
 		allIPs = inetAddresses;
@@ -582,7 +572,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 
 	@Override
 	public void SendCoordinatorMessage(int originatorID, int coordinatorID) throws RemoteException {
-		// TODO Auto-generated method stub
 		if(originatorID == myID && this.coordinatorID != -1) {
 			//no more messages needed
 			if(verbose)
@@ -616,6 +605,8 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 
 	@Override
 	public void SendState(State recievedState, ArrayList<InetAddress> inetAddresses, int coordinatorID) throws RemoteException {
+		if(verbose)
+			System.out.println("received a state, I think coordinator is:"+coordinatorID);
 		if(myID == coordinatorID)
 		{
 			//states synchronized
