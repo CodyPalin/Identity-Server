@@ -71,8 +71,10 @@ public class SetupCommunication {
 	
 		    	ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
 		    	stub.StartElection();
+		    	break;
 			} catch (RemoteException | NotBoundException e) {
 			    System.err.println("Could not start initial election.");
+			    System.err.println(e.getMessage());
 			}
 	    }
 	    
