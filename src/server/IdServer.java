@@ -28,6 +28,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import server.IdServer.Data;
+
 
 /**
  * The IdServer class, handles the methods for the accounts, stores, manages the accounts and returns what the IdClient requests
@@ -283,7 +285,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		return value;
 	}
 	private void StartStateMessage() {
-		State state = new State(loginsReverse, logins, logindata, realusers);
 		if(verbose) {
 			System.out.println("Sending state.");
 		}
@@ -293,7 +294,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 				Registry registry = LocateRegistry.getRegistry(allIPs.get(nextid).getHostAddress(), registryPort);
 		
 			    ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
-			    stub.SendState(state, allIPs, coordinatorID);
+			    stub.SendState(loginsReverse, logins, logindata, realusers, allIPs, coordinatorID);
 			    return;
 			} catch (RemoteException | NotBoundException e) {
 				System.err.println("Server with ID: "+nextid+" not responding");
@@ -609,7 +610,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 	}
 
 	@Override
-	public void SendState(State recievedState, ArrayList<InetAddress> inetAddresses, int coordinatorID) throws RemoteException {
+	public void SendState(HashMap<Long, String> loginsReverse, HashMap<String, Long> logins, HashMap<Long, Data> logindata, ArrayList<Data> realusers, ArrayList<InetAddress> inetAddresses, int coordinatorID) throws RemoteException {
 		if(verbose)
 			System.out.println("received a state, I think coordinator is:"+coordinatorID);
 		if(myID == coordinatorID)
@@ -622,10 +623,10 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			this.allIPs = inetAddresses;
 			this.coordinatorID = coordinatorID;
 		}
-		loginsReverse = recievedState.loginsReverse;
-		logins = recievedState.logins;
-		logindata = recievedState.logindata;
-		realusers = recievedState.realusers;
+		this.loginsReverse = loginsReverse;
+		this.logins = logins;
+		this.logindata = logindata;
+		this.realusers = realusers;
 		
 		int nextid = incrementID(myID);
 		while(nextid != myID) {
@@ -633,7 +634,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 				Registry registry = LocateRegistry.getRegistry(allIPs.get(nextid).getHostAddress(), registryPort);
 		
 			    ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
-			    stub.SendState(recievedState, inetAddresses, coordinatorID);
+			    stub.SendState(loginsReverse, logins, logindata, realusers, inetAddresses, coordinatorID);
 			    return;
 			} catch (RemoteException | NotBoundException e) {
 				System.err.println("Server with ID: "+nextid+" not responding");
