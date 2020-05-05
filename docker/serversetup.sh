@@ -1,6 +1,9 @@
 #!/bin/bash
 read -p "Enter Password: " -s pass
-echo $pass | sudo -S docker build -t identityimage:1.1 .
+if [ -z ${2+x} ] || [ "$2" != "nocache" ]
+    then echo $pass | sudo -S docker build -t identityimage:1.1 .
+    else echo $pass | sudo -S docker build --no-cache=true -t identityimage:1.1 .
+fi
 echo "Launching $1 servers..."
 for ((i=1; i <= $1; ++i))
 do 
