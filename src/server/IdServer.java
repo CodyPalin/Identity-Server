@@ -67,26 +67,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		@Override
 		public void run() {
 			State state = new State(loginsReverse, logins, logindata, realusers);
-			if(myID == coordinatorID) {
-				if(verbose) {
-					System.out.println("Sending state.");
-				}
-				int nextid = incrementID(myID);
-				while(nextid != myID) {
-					try {	
-						Registry registry = LocateRegistry.getRegistry(allIPs.get(nextid).getHostAddress(), registryPort);
-				
-					    ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
-					    stub.SendState(state, allIPs, coordinatorID);
-					    break;
-					} catch (RemoteException | NotBoundException e) {
-						System.err.println("Server with ID: "+nextid+" not responding");
-					} catch (ClassCastException e) {
-						
-					}
-					nextid = incrementID(nextid);
-				}
-			}
     		FileOutputStream fout;
 			try {
 				fout = new FileOutputStream("./state.ser");
@@ -194,7 +174,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
         }
         task = new MyTimerTask();
 		timer = new Timer();
-		timer.scheduleAtFixedRate(task, 0, 3000);
+		timer.scheduleAtFixedRate(task, 0, 1000);
 
         alivetask = new AliveTimerTask();
 		alivetimer = new Timer();
@@ -299,8 +279,32 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		loginsReverse.put(value, loginname);
 		logins.put(loginname, value);
 		logindata.put(value, user);
+		StartStateMessage();
 		return value;
 	}
+	private void StartStateMessage() {
+		State state = new State(loginsReverse, logins, logindata, realusers);
+		if(verbose) {
+			System.out.println("Sending state.");
+		}
+		int nextid = incrementID(myID);
+		while(nextid != myID) {
+			try {	
+				Registry registry = LocateRegistry.getRegistry(allIPs.get(nextid).getHostAddress(), registryPort);
+		
+			    ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
+			    stub.SendState(state, allIPs, coordinatorID);
+			    return;
+			} catch (RemoteException | NotBoundException e) {
+				System.err.println("Server with ID: "+nextid+" not responding");
+			} catch (ClassCastException e) {
+				
+			}
+			nextid = incrementID(nextid);
+		}
+		
+	}
+
 	@Override
 	 /**
      * Searches for UUID based on loginname.
@@ -409,7 +413,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			return false;
 		logins.remove(oldLoginName);
 		logins.put(newLoginName, uuid);
-		
+		StartStateMessage();
 		return true;
 	}
 
@@ -452,6 +456,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		logindata.remove(uuid);
 		loginsReverse.remove(uuid);
 		logins.remove(loginname);
+		StartStateMessage();
 		return true;
 	}
 
