@@ -501,10 +501,10 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			System.out.println("My ID is: "+myID);
         task = new MyTimerTask();
 		timer = new Timer();
-		timer.scheduleAtFixedRate(task, 0, 15000);
+		timer.scheduleAtFixedRate(task, 0, 3000);
         alivetask = new AliveTimerTask();
 		alivetimer = new Timer();
-		alivetimer.scheduleAtFixedRate(alivetask, 0, 5000);
+		alivetimer.scheduleAtFixedRate(alivetask, 0, 3000);
 
 	}
 
@@ -547,7 +547,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			    stub.SendState(loginsReverse, logins, logindata, realusers, allIPs, coordinatorID);
 			    return;
 			} catch (RemoteException | NotBoundException e) {
-				System.err.println("Server with ID: "+nextid+" not responding");
+				//System.err.println("Server with ID: "+nextid+" not responding");
 			} catch (ClassCastException e) {
 				System.err.println(e.getMessage());
 			}
@@ -582,7 +582,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 				    stub.SendElectionMessage(ids);
 				    return;
 				} catch (RemoteException | NotBoundException e) {
-				    System.err.println("Server with ID: "+nextid+" not responding");
+				    //System.err.println("Server with ID: "+nextid+" not responding");
 				}
 				nextid = incrementID(nextid);
 			}
@@ -617,7 +617,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 				    stub.SendCoordinatorMessage(originatorID, coordinatorID);
 				    return;
 				} catch (RemoteException | NotBoundException e) {
-				    System.err.println("Server with ID: "+nextid+" not responding");
+				    //System.err.println("Server with ID: "+nextid+" not responding");
 				}
 				nextid = incrementID(nextid);
 			}
@@ -660,7 +660,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			    stub.SendState(loginsReverse, logins, logindata, realusers, inetAddresses, coordinatorID);
 			    return;
 			} catch (RemoteException | NotBoundException e) {
-				System.err.println("Server with ID: "+nextid+" not responding");
+				//System.err.println("Server with ID: "+nextid+" not responding");
 			}
 			nextid = incrementID(nextid);
 		}
