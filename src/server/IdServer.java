@@ -108,7 +108,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		}
     	
     }
-    public class Data implements Serializable{
+    public static class Data implements Serializable{
 	    /**
 		 * 
 		 */
@@ -284,27 +284,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		logindata.put(value, user);
 		StartStateMessage();
 		return value;
-	}
-	private void StartStateMessage() {
-		if(verbose) {
-			System.out.println("Sending state.");
-		}
-		int nextid = incrementID(myID);
-		while(nextid != myID) {
-			try {	
-				Registry registry = LocateRegistry.getRegistry(allIPs.get(nextid).getHostAddress(), registryPort);
-		
-			    ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
-			    stub.SendState(loginsReverse, logins, logindata, realusers, allIPs, coordinatorID);
-			    return;
-			} catch (RemoteException | NotBoundException e) {
-				System.err.println("Server with ID: "+nextid+" not responding");
-			} catch (ClassCastException e) {
-				System.err.println(e.getMessage());
-			}
-			nextid = incrementID(nextid);
-		}
-		
 	}
 
 	@Override
@@ -539,6 +518,28 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			nextid = 0;
 		}
 		return nextid;
+	}
+
+	private void StartStateMessage() {
+		if(verbose) {
+			System.out.println("Sending state.");
+		}
+		int nextid = incrementID(myID);
+		while(nextid != myID) {
+			try {	
+				Registry registry = LocateRegistry.getRegistry(allIPs.get(nextid).getHostAddress(), registryPort);
+		
+			    ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
+			    stub.SendState(loginsReverse, logins, logindata, realusers, allIPs, coordinatorID);
+			    return;
+			} catch (RemoteException | NotBoundException e) {
+				System.err.println("Server with ID: "+nextid+" not responding");
+			} catch (ClassCastException e) {
+				System.err.println(e.getMessage());
+			}
+			nextid = incrementID(nextid);
+		}
+		
 	}
 	@Override
 	public void SendElectionMessage(ArrayList<Integer> ids) throws RemoteException {
