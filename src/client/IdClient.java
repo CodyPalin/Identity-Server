@@ -1,7 +1,12 @@
 package client;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 import org.apache.commons.cli.CommandLine;
 //import command line parser (need to import jar files if you see errors here, see readme)
@@ -37,7 +42,7 @@ static int registryPort = 1099;
     public static void main(String[] args) {
 	    CommandLineParser parser = new DefaultParser();
 	    Options options = new Options();
-	    options.addRequiredOption("s", "server", 			true, 	"<serverhost> server host ip");
+	    options.addRequiredOption("s", "server", 			true, 	"<serverhost> server host ip or list of IPs");
 	    options.addOption("n", "numport", 			true, 	"<port#> port number");
 	    Option create = Option.builder("c")
 	    		.longOpt("create")
@@ -66,7 +71,24 @@ static int registryPort = 1099;
 	        System.err.println( "Parsing failed.  Reason: " + e1.getMessage() );
 	        System.exit(1);
 		}
-		String host = cmd.getOptionValue("server");
+		String hosts = cmd.getOptionValue("server");
+		ArrayList<String> hostlist = new ArrayList<String>();
+		if(hosts.contains(".txt")) {
+			File f = new File(hosts);
+		    Scanner fileScanner = null;
+		    try {
+				fileScanner = new Scanner(f);
+			} catch (FileNotFoundException e) {
+				System.err.println("File not Found");
+				System.exit(1);
+			}
+		    while(fileScanner.hasNextLine()) {
+		    	hostlist.add(fileScanner.nextLine());
+		    }
+		}
+		else {
+			hostlist.add(hosts);
+		}
 		if(cmd.hasOption("numport")) {
 			try{
 				registryPort = Integer.parseInt(cmd.getOptionValue("numport"));
@@ -80,11 +102,23 @@ static int registryPort = 1099;
 	    System.setProperty("javax.net.ssl.trustStore", "../resources/Client_Truststore");
 	    System.setProperty("java.security.policy", "../resources/mysecurity.policy");
 	    /* System.setSecurityManager(new RMISecurityManager()); */
-	    
 	    try {
-	    Registry registry = LocateRegistry.getRegistry(host, registryPort);
-	    Identity stub = (Identity) registry.lookup("IdServer");
-	    
+	    Registry registry = null;
+	    Identity stub = null;
+    	for(String host: hostlist) {
+		    registry = LocateRegistry.getRegistry(host, registryPort);
+    		try {
+    			stub = (Identity) registry.lookup("IdServer");
+    			break;
+    		}
+    		catch(RemoteException e) {
+    			
+    		}
+    	}
+    	if(stub == null) {
+    		System.err.println("All servers offline.");
+    		System.exit(1);
+    	}
 	    //int result = 0;
 		//result = stub.identity(value); can call functions from server like this
 	    String passwordInput = "";
