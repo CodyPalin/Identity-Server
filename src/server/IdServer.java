@@ -501,7 +501,7 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			System.out.println("My ID is: "+myID);
         task = new MyTimerTask();
 		timer = new Timer();
-		timer.scheduleAtFixedRate(task, 0, 1000);
+		timer.scheduleAtFixedRate(task, 0, 15000);
         alivetask = new AliveTimerTask();
 		alivetimer = new Timer();
 		alivetimer.scheduleAtFixedRate(alivetask, 0, 5000);
@@ -535,9 +535,9 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 	}
 
 	private void StartStateMessage() {
-		if(verbose) {
-			System.out.println("Sending state.");
-		}
+//		if(verbose) {
+//			System.out.println("Sending state.");
+//		}
 		int nextid = incrementID(myID);
 		while(nextid != myID) {
 			try {	
@@ -634,14 +634,14 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 
 	@Override
 	public void SendState(HashMap<Long, String> loginsReverse, HashMap<String, Long> logins, HashMap<Long, Data> logindata, ArrayList<Data> realusers, ArrayList<InetAddress> inetAddresses, int coordinatorID) throws RemoteException {
-		if(verbose)
-			System.out.println("received a state, I think coordinator is:"+coordinatorID);
+		//if(verbose)
+		//	System.out.println("received a state, I think coordinator is:"+this.coordinatorID);
 		if(myID == coordinatorID)
 		{
 			//states synchronized
 			return;
 		}
-		if(coordinatorID == -1) {
+		if(this.coordinatorID == -1) {
 			//this means I have crashed and other servers are still running
 			this.allIPs = inetAddresses;
 			this.coordinatorID = coordinatorID;
