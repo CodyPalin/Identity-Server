@@ -1,0 +1,44 @@
+//Before doing any of the following tests, you will need to start the servers where
+//numServers is the number of servers you wish to start (required), and nocache is an 
+//optional argument that will build the dockerfile without caching, this is important if
+//there have been any updates to the source code. The dockerfile pulls from github so you 
+//will need an internet connection:
+$(cd docker && ./serversetup.sh [numServers] <nocache>)
+//Then you will need to initialize the servers. (Note that this elects a coordinator):
+$ ./serverinit.sh
+
+Test1--Coordinator failure (with persistency):
+$(cd bin && java -cp commons-cli-1.4.jar:.: client.IdClient -s ../docker/IPlist.txt -c Cody steve -p 1234
+$(cd bin && java -cp commons-cli-1.4.jar:.: client.IdClient -s ../docker/IPlist.txt -g all)
+//The docker containers are conveniently named in order of their IDs, so the server with the highest ID
+//will be the server with the highest number after idserver[num]. For example the server with
+//ID = 2 is IDServer3.
+$docker kill [coordinator ps] 
+//The discovery that a server is dead is not immediate but if servers exist, they will 
+//eventually discover that the coordinator is dead on their own. This does not mean that
+//you cannot pass commands in however. If you prefer not to wait, simply do:
+$(cd bin && java -cp commons-cli-1.4.jar:.: client.IdClient -s ../docker/IPlist.txt -g all)
+//or any client command passing in the IPlist and the servers will attempt to bounce the command
+//to the coordinator, discovering that it is not responding and immediately starting
+//an election algorithm, your command will be delayed but will return after the election.
+
+Test2--previous Coordinator comes back to life:
+//start with a server already having lost its coordinator and recovered
+//use "$docker ps -a" to get the pid of the killed idserver
+$docker start -i [pid]
+//after a few seconds the server will have recieved a state message and be reintegrated
+//into the system as a backup server, not conflicting with new coordinator
+
+Test3--persistency:
+//make a modification to the state then immediately afterwards kill the coordinator
+$(cd bin && java -cp commons-cli-1.4.jar:.: client.IdClient -s ../docker/IPlist.txt -c Hagrid steve -p 1234
+$docker kill [coordinator-pid]
+$(cd bin && java -cp commons-cli-1.4.jar:.: client.IdClient -s ../docker/IPlist.txt -g all
+
+Test4--client new server discovery:
+//the client looks at the .txt file passed in as a list of servers to try, from top to bottom.
+//kill the server at the top of the list (look at that server's console for it's ID) then run a client
+//command with the list of servers. The client will take a few seconds longer, but after failing to 
+//connect with the first server on the list it will move on to the next one, and so on
+$docker kill IDserver1
+$(cd bin && java -cp commons-cli-1.4.jar:.: client.IdClient -s ../docker/IPlist.txt -l Hagrid
