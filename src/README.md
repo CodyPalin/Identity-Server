@@ -26,6 +26,7 @@ Spring 2020
                 ServerCommunication.java
                 SetupCommunication.java
             Libraries
+        build.xml
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -37,22 +38,24 @@ Spring 2020
             when using a debian based linux system 
         2a. or use centosserversetup.sh using
                 <runcommand> centosserversetup.sh <numberofservers>
-        3. How to handle the client
+        3. Next go into the main directory that holds the build.xml file and build it.
+            For this step we have ant installed and ran the command 
+                ant
+            into the kernel and the project will build
     Running:
-        3. To run the server do java IdServer
-        4. Then to run a client to see if IdServer works, do java IdClient
-        5. in IdClient Terminal do java IdClient --(s)erver localhost (Any Query Commands along with their arguments, some arguments are 
-                                                                                        create, lookup, reverselookup, modify, and delete, if the argument is wrong, a message will occur that will give the correct parameters to perform the query)
+        4. in IdClient Terminal do java -cp commons-cli-1.4.jar:.: client.IdClient --(s)erver idserver# [--numport <ipaddress>] (Any Query Commands along 
+                                                                                        with their arguments, some arguments are 
+                                                                                        create, lookup, reverselookup, modify, delete, and get if the argument is wrong, a message will occur that will give the correct parameters to perform the query)
 
 ** Testing ** 
 We began by first testing if the serversetup.sh functioned in a linux based system, and then we decided to test it on another linux based os centos, however the first .sh file did not work because centos doesn't have the same kind of emulation console as debian, so we had to search for an alternative
 emulation system along with adjusting the syntax to make it function properly.
 
 ** Observations **
-It's understandable why the paper plan was due before the project as this project is difficult to picture. Especially since there has not been too many physical examples since there are so many different implementations to handle fault tolerance, multiple servers interacting and the ability for the client to interact with the server even though it is down. There's a lot of small moving pieces that make it difficult to imagine. Not to mention that the beginning steps of making a setupserver file so multiple servers could be set up easily was a somewhat tricky task due to the fact that not even linux distributions share the same kind of files or use the same kind of executables/libraries.
+It's understandable why the paper plan was due before the project as this project is difficult to picture. Especially since there has not been too many physical examples since there are so many different implementations to handle fault tolerance, multiple servers interacting and the ability for the client to interact with the server even though it is down. There's a lot of small moving pieces that make it difficult to imagine. Not to mention that the beginning steps of making a setupserver file so multiple servers could be set up easily was a somewhat tricky task due to the fact that not even linux distributions share the same kind of files or use the same kind of executables/libraries. We finally got a better grip on how to use ant, making building the project much simpler and nicer.
 
 Omar: Tested using CentOs operating system using a vm do determine if serversetup.sh functioned properly then modified serversetup.sh into a            
-      centosserversetup.sh
+      centosserversetup.sh. Tested building and running commands on client.
 Cody: Restructured the code, made the dockerfile along with the initial serversetup.sh file. Modified the server files to create an ip list of the current servers
 
 Video: N/A yet
