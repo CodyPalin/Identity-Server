@@ -87,6 +87,8 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 				//System.err.println("There is currently no coordinator");
 				return;
 			}
+			if(verbose)
+				System.out.print(".");
 			boolean alive = false;
 			try {
 				if(coordinatorRegistry == null)
@@ -106,6 +108,9 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 					System.err.println("failed to start election");
 					e.printStackTrace();
 				}
+			}
+			else {
+				System.out.print(" ");
 			}
 		}
     	
@@ -618,6 +623,9 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 
 	@Override
 	public boolean AreYouAlive() throws RemoteException {
+		if(verbose) {
+			System.out.print("\\/"); //coordinator heartbeat
+		}
 		return true;
 	}
 
