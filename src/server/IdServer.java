@@ -63,6 +63,9 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		@Override
 		public void run() {
 			State state = new State(loginsReverse, logins, logindata, realusers);
+			if(myID == coordinatorID) {
+				StartStateMessage();
+			}
     		FileOutputStream fout;
 			try {
 				fout = new FileOutputStream("./state.ser");
