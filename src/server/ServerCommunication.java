@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import server.IdServer.Data;
-import server.IdServer.State;
 
 public interface ServerCommunication extends java.rmi.Remote{
 	/**

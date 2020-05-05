@@ -28,7 +28,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import server.IdServer.Data;
+
 
 
 /**
@@ -37,14 +37,7 @@ import server.IdServer.Data;
  *
  */
 public class IdServer extends UnicastRemoteObject implements Identity,ServerCommunication{
-	class Data implements Serializable{
-	    /**
-		 * 
-		 */
-		private static final long serialVersionUID = -209569222800945680L;
-		String username;
-	    int passHash;
-	}
+	
 	private static final long serialVersionUID = 8510789827054962873L;
     private static int registryPort = 1099; //by default rmiregistry service runs on port 1099
     private static boolean verbose = false;
@@ -115,6 +108,14 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		}
     	
     }
+    public class Data implements Serializable{
+	    /**
+		 * 
+		 */
+		private static final long serialVersionUID = -209569222800945680L;
+		public String username;
+	    public int passHash;
+	}
     public class State implements Serializable{
 
 		/**
@@ -298,6 +299,8 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			    return;
 			} catch (RemoteException | NotBoundException e) {
 				System.err.println("Server with ID: "+nextid+" not responding");
+			} catch (ClassCastException e) {
+				System.err.println(e.getMessage());
 			}
 			nextid = incrementID(nextid);
 		}
