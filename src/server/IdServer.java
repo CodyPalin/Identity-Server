@@ -211,6 +211,26 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
      * @throws java.rmi.RemoteException
      */
 	public long Create(String loginname, String realname, String password) throws RemoteException, NamingException {
+		if(myID != coordinatorID) {
+			if(verbose) {
+				System.out.println("recieved rmi from client, bouncing to coordinator");
+			}
+			try {
+			Registry registry = LocateRegistry.getRegistry(allIPs.get(coordinatorID).getHostAddress(), registryPort);
+		    Identity stub = (Identity) registry.lookup("IdServer");
+		    return stub.Create(loginname, realname, password);
+			} catch (RemoteException | NotBoundException e) {
+			    System.err.println("Coordinator did not respond, starting election and then trying again in 5 seconds");
+			    StartElection();
+			    try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			    Create(loginname, realname, password);
+			}
+		}
 		if(verbose)
 			System.out.println("creating new login: "+loginname);
 		Data user = new Data();
@@ -235,6 +255,26 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
      * @throws java.rmi.RemoteException
      */
 	public String Lookup(String loginname) throws RemoteException {
+		if(myID != coordinatorID) {
+			if(verbose) {
+				System.out.println("recieved rmi from client, bouncing to coordinator");
+			}
+			try {
+			Registry registry = LocateRegistry.getRegistry(allIPs.get(coordinatorID).getHostAddress(), registryPort);
+		    Identity stub = (Identity) registry.lookup("IdServer");
+		    return stub.Lookup(loginname);
+			} catch (RemoteException | NotBoundException e) {
+			    System.err.println("Coordinator did not respond, starting election and then trying again in 5 seconds");
+			    StartElection();
+			    try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			    Lookup(loginname);
+			}
+		}
 		if(verbose)
 			System.out.println("looking up login: "+loginname);
 		// TODO Auto-generated method stub
@@ -251,6 +291,26 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
      * @throws java.rmi.RemoteException
      */
 	public String reverseLookup(long UUID) throws RemoteException {
+		if(myID != coordinatorID) {
+			if(verbose) {
+				System.out.println("recieved rmi from client, bouncing to coordinator");
+			}
+			try {
+			Registry registry = LocateRegistry.getRegistry(allIPs.get(coordinatorID).getHostAddress(), registryPort);
+		    Identity stub = (Identity) registry.lookup("IdServer");
+		    return stub.reverseLookup(UUID);
+			} catch (RemoteException | NotBoundException e) {
+			    System.err.println("Coordinator did not respond, starting election and then trying again in 5 seconds");
+			    StartElection();
+			    try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			    reverseLookup(UUID);
+			}
+		}
 		if(verbose)
 			System.out.println("performing reverse lookup: "+UUID);
 		if(!loginsReverse.containsKey(UUID))
@@ -270,6 +330,26 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
      * @throws java.rmi.RemoteException
      */
 	public boolean Modify(String oldLoginName, String newLoginName, String password) throws RemoteException {
+		if(myID != coordinatorID) {
+			if(verbose) {
+				System.out.println("recieved rmi from client, bouncing to coordinator");
+			}
+			try {
+			Registry registry = LocateRegistry.getRegistry(allIPs.get(coordinatorID).getHostAddress(), registryPort);
+		    Identity stub = (Identity) registry.lookup("IdServer");
+		    return stub.Modify(oldLoginName, newLoginName, password);
+			} catch (RemoteException | NotBoundException e) {
+			    System.err.println("Coordinator did not respond, starting election and then trying again in 5 seconds");
+			    StartElection();
+			    try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			    Modify(oldLoginName, newLoginName, password);
+			}
+		}
 		if(verbose)
 			System.out.println("modifying login: ");
 		long uuid = logins.get(oldLoginName);
@@ -293,6 +373,26 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
      * @throws java.rmi.RemoteException
      */
 	public boolean Delete(String loginname, String password) throws RemoteException {
+		if(myID != coordinatorID) {
+			if(verbose) {
+				System.out.println("recieved rmi from client, bouncing to coordinator");
+			}
+			try {
+			Registry registry = LocateRegistry.getRegistry(allIPs.get(coordinatorID).getHostAddress(), registryPort);
+		    Identity stub = (Identity) registry.lookup("IdServer");
+		    return stub.Delete(loginname, password);
+			} catch (RemoteException | NotBoundException e) {
+			    System.err.println("Coordinator did not respond, starting election and then trying again in 5 seconds");
+			    StartElection();
+			    try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			    Delete(loginname, password);
+			}
+		}
 		if(verbose)
 			System.out.println("deleting login: ");
 		long uuid = logins.get(loginname);
@@ -313,6 +413,26 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 	 * Gets all info for level
 	 */
 	public String get(Level level) throws RemoteException {
+		if(myID != coordinatorID) {
+			if(verbose) {
+				System.out.println("recieved rmi from client, bouncing to coordinator");
+			}
+			try {
+			Registry registry = LocateRegistry.getRegistry(allIPs.get(coordinatorID).getHostAddress(), registryPort);
+		    Identity stub = (Identity) registry.lookup("IdServer");
+		    return stub.get(level);
+			} catch (RemoteException | NotBoundException e) {
+			    System.err.println("Coordinator did not respond, starting election and then trying again in 5 seconds");
+			    StartElection();
+			    try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			    get(level);
+			}
+		}
 		if(verbose)
 			System.out.println("getting all info at level: "+level);
 		switch(level){
