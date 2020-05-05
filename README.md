@@ -67,5 +67,5 @@ Omar: Tested using CentOs operating system using a vm do determine if serversetu
 
 Cody: Added savestate functionality to IdServer. Created Dockerfile. Built serversetup.sh so we could launch multiple servers easily to make testing easier and save time. Created SetupCommunication.java for passing the IPs into each of the servers then running the first election. Made serverinit.sh for easy calling of SetupCommunication.java in the default case of passing in the IPlist.txt. Created and implemented ServerCommunication interface for server-server messages. Tested IdServer to make sure consistency and coordination worked without too many flaws. Modified IdServer so that it could handle .txt input as well as just an IP/hostname. Created Makefile.
 
-Video: N/A yet
+Video: https://youtu.be/M3MCR1Rvlg0
 
