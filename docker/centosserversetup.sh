@@ -2,9 +2,9 @@
 read -p "Enter Password: " -s pass
 echo $pass | sudo -S docker build -t identityimage:1.1 .
 echo "Launching $1 servers..."
-for ((i=1; i <= $1; ++i))
+for ((i=1; i<= $1; ++i))
 do 
-    x-terminal-emulator -e "echo $pass | sudo -S docker run --name="idserver${i}" --hostname="idserver${i}" timeserverimage:1.1"
+    gnome-terminal gnome-terminal -x bash -c "echo $pass | sudo -S docker run --name="idserver${i}" --hostname="idserver${i}" identityimage:1.1 ; exec bash"
 done
 sleep 8
 echo "Retrieving IPs..."
