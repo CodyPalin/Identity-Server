@@ -298,8 +298,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 			    return;
 			} catch (RemoteException | NotBoundException e) {
 				System.err.println("Server with ID: "+nextid+" not responding");
-			} catch (ClassCastException e) {
-				
 			}
 			nextid = incrementID(nextid);
 		}
