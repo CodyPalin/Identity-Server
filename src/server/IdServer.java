@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -47,6 +48,10 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
     private static int registryPort = 1099; //by default rmiregistry service runs on port 1099
     private static boolean verbose = false;
     private String name;
+    ArrayList<InetAddress> allIPs = new ArrayList<InetAddress>();
+    private static InetAddress myIP;
+    private int myID;
+    private int coordinatorID = -1;
     private HashMap<Long, String> loginsReverse = new HashMap<Long, String>();
     private HashMap<String, Long> logins = new HashMap<String, Long>();
     private HashMap<Long, Data> logindata = new HashMap<Long, Data>();
@@ -184,14 +189,15 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
             System.out.println("Exception occurred: " + th);
         }
         InetAddress inetAddress = null;
-			try {
-				inetAddress = InetAddress.getLocalHost();
-			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			inetAddress = InetAddress.getLocalHost();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		myIP = inetAddress;
         System.out.println("IP Address:- " + inetAddress.getHostAddress());
-        System.out.println("Host Name:- " + inetAddress.getHostName());
+        //System.out.println("Host Name:- " + inetAddress.getHostName());
         
     }
         
@@ -329,9 +335,94 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 	@Override
 	public void SetupCommunication(ArrayList<InetAddress> inetAddresses) throws RemoteException {
 		// TODO Auto-generated method stub
-		System.out.println("Got IP list:");
-		for(InetAddress address: inetAddresses) {
-			System.out.println(address.getHostAddress());
+		if(verbose)
+			System.out.println("Got IP list:");
+		allIPs = inetAddresses;
+		myID = inetAddresses.indexOf(myIP);
+		if(verbose)
+			System.out.println("My ID is: "+myID);
+	}
+
+	@Override
+	public void StartElection() throws RemoteException {
+		ArrayList<Integer> ids = new ArrayList<Integer>();
+		SendElectionMessage(ids);
+		
+	}
+
+	private int incrementID(int nextid) {
+
+		if(nextid+1 < allIPs.size()) {
+			nextid = nextid+1;
+		}
+		else {
+			nextid = 0;
+		}
+		return nextid;
+	}
+	@Override
+	public void SendElectionMessage(ArrayList<Integer> ids) throws RemoteException {
+		if(ids.contains(myID))
+		{
+			int coordinatorID = myID;
+			for(int id : ids) {
+				if(id > coordinatorID) {
+					coordinatorID = id;
+				}
+			}
+			SendCoordinatorMessage(myID, coordinatorID);
+			
+		}
+		else 
+		{
+			this.coordinatorID = -1;
+			ids.add(myID);
+			int nextid = incrementID(myID);
+			while(nextid != myID) {
+				try {	
+					Registry registry = LocateRegistry.getRegistry(allIPs.get(nextid).getHostAddress(), registryPort);
+			
+				    ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
+				    stub.SendElectionMessage(ids);
+				    return;
+				} catch (RemoteException | NotBoundException e) {
+				    System.err.println("Server with ID: "+nextid+" not responding");
+				}
+				nextid = incrementID(nextid);
+			}
+			//no other servers responding
+			SendElectionMessage(ids); //send to self
+			
+		}
+		
+	}
+
+	@Override
+	public void SendCoordinatorMessage(int originatorID, int coordinatorID) throws RemoteException {
+		// TODO Auto-generated method stub
+		if(originatorID == myID && this.coordinatorID != -1) {
+			//no more messages needed
+			if(verbose)
+				System.out.println("Coordinator message complete");
+		}
+		else {
+			this.coordinatorID = coordinatorID;
+			if(verbose && myID == coordinatorID) {
+				System.out.println("Election won, I am coordinator");
+			}
+			int nextid = incrementID(myID);
+			while(nextid != myID) {
+				try {	
+					Registry registry = LocateRegistry.getRegistry(allIPs.get(nextid).getHostAddress(), registryPort);
+			
+				    ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
+				    stub.SendCoordinatorMessage(originatorID, coordinatorID);
+				    return;
+				} catch (RemoteException | NotBoundException e) {
+				    System.err.println("Server with ID: "+nextid+" not responding");
+				}
+				nextid = incrementID(nextid);
+			}
 		}
 	}
 

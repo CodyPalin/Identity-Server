@@ -65,6 +65,15 @@ public class SetupCommunication {
 			    System.err.println("Could not access host at: "+ address.getHostAddress());
 			}
 	    }
+	    try {
+	    	Registry registry = LocateRegistry.getRegistry(inetAddresses.get(0).getHostAddress(), registryPort);
+
+	    	ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
+	    	stub.StartElection();
+		} catch (RemoteException | NotBoundException e) {
+		    System.err.println("Could not start initial election.");
+		}
+	    
 	}
 
 }

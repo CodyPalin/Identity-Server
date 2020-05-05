@@ -10,4 +10,11 @@ public interface ServerCommunication extends java.rmi.Remote{
 	 * @throws java.rmi.RemoteException
 	 */
 	void SetupCommunication(ArrayList<InetAddress> inetAddresses) throws java.rmi.RemoteException;
+	/**
+	 * starts an election from this server.
+	 * @throws java.rmi.RemoteException
+	 */
+	void StartElection() throws java.rmi.RemoteException;
+	void SendElectionMessage(ArrayList<Integer> ids) throws java.rmi.RemoteException;
+	void SendCoordinatorMessage(int originatorID, int coordinatorID) throws java.rmi.RemoteException;
 }
