@@ -87,14 +87,14 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 				//System.err.println("There is currently no coordinator");
 				return;
 			}
-			if(verbose)
-				System.out.print(".");
+			//if(verbose)
+			//	System.out.print(".");
 			boolean alive = false;
 			try {
 				if(coordinatorRegistry == null)
 					coordinatorRegistry = LocateRegistry.getRegistry(allIPs.get(coordinatorID).getHostAddress(), registryPort);
 				
-		    	ServerCommunication stub = (ServerCommunication) registry.lookup("IdServer");
+		    	ServerCommunication stub = (ServerCommunication) coordinatorRegistry.lookup("IdServer");
 	    	
 				alive = stub.AreYouAlive();
 			} catch (RemoteException | NotBoundException e) {
@@ -109,9 +109,9 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 					e.printStackTrace();
 				}
 			}
-			else {
-				System.out.print(" ");
-			}
+//			else {
+//				System.out.print(" ");
+//			}
 		}
     	
     }
@@ -623,9 +623,9 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 
 	@Override
 	public boolean AreYouAlive() throws RemoteException {
-		if(verbose) {
-			System.out.print("\\/"); //coordinator heartbeat
-		}
+//		if(verbose) {
+//			System.out.print("\\/"); //coordinator heartbeat
+//		}
 		return true;
 	}
 
