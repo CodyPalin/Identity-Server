@@ -181,9 +181,6 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		timer = new Timer();
 		timer.scheduleAtFixedRate(task, 0, 1000);
 
-        alivetask = new AliveTimerTask();
-		alivetimer = new Timer();
-		alivetimer.scheduleAtFixedRate(alivetask, 0, 1000);
         }    
     
     public static void main(String args[]) {
@@ -494,6 +491,13 @@ public class IdServer extends UnicastRemoteObject implements Identity,ServerComm
 		myID = inetAddresses.indexOf(myIP);
 		if(verbose)
 			System.out.println("My ID is: "+myID);
+        task = new MyTimerTask();
+		timer = new Timer();
+		timer.scheduleAtFixedRate(task, 0, 1000);
+        alivetask = new AliveTimerTask();
+		alivetimer = new Timer();
+		alivetimer.scheduleAtFixedRate(alivetask, 0, 5000);
+
 	}
 
 	@Override
